@@ -1,74 +1,114 @@
-# ProjectCNN_Helmetman
-#วัตถุประสงค์
-เพื่อรวบรวมข้อมูลสถิติที่แม่นยำเกี่ยวกับการสวมหมวกกันน็อคในมหาวิทยาลัยเพื่อส่งเสริมความปลอดภัย
-เพื่อพัฒนาโมเดล AI ที่สามารถตรวจจับการสวมหมวกกันน็อคและการไม่สวมหมวกกันน็อคจากภาพได้
+# 🪖 ProjectCNN_Helmetman
 
-#รายละเอียดชุดข้อมูลที่นำมาใช้ 
-1.จัดหาเอง ชุดข้อมูลนี้ได้จากการลงพื้นที่เก็บข้อมูล ณ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ วิทยาเขตปราจีนบุรี
-2.รับข้อมูลมา ได้เอาข้อมูลมาจากแหล่งอ้างอิงเพิ่มเติมอีก https://www.kaggle.com/datasets/abuzarkhaaan/helmet-dataset-cls/data 
+**ระบบตรวจจับการสวมหมวกกันน็อคด้วย Deep Learning (CNN)**
 
-#การแบ่งชุดข้อมูล (Train, Test, Validate)
-trainset 80% 
-testset 10% 
-validate 10% 
+โปรเจกต์นี้พัฒนาโมเดล Computer Vision เพื่อจำแนกภาพผู้ขับขี่ตามพฤติกรรมการสวมหมวกกันน็อค โดยมีเป้าหมายเพื่อสนับสนุนการรวบรวมสถิติความปลอดภัยในมหาวิทยาลัย และเป็นต้นแบบระบบตรวจสอบความปลอดภัยบนท้องถนน
 
-Class 1 สวมครบทุกคน
-หาเอง 300 
-ข้อมูลจาก kaggle 155 รูป
+---
 
-Class 2 ไม่สวมเลยสักคน
-หาเอง 300 
-ข้อมูลจาก kaggle 155 รูป
+## 📌 วัตถุประสงค์
 
-Class 3 ไม่สวมบางคน
-หาเอง 455
+- รวบรวมข้อมูลสถิติที่แม่นยำเกี่ยวกับการสวมหมวกกันน็อคภายในมหาวิทยาลัย เพื่อส่งเสริมความปลอดภัยของผู้ขับขี่
+- พัฒนาโมเดล AI (CNN) ที่สามารถตรวจจับและจำแนกการสวมหมวกกันน็อคจากภาพถ่ายได้อย่างแม่นยำ
 
-#การจัดเตรียมข้อมูล
-1. จัดหาข้อมูล
--ถ่ายเอง โดยจะนัดกลุ่มตัวอย่างออกมาถ่าย ที่ มจพ ปราจีนบุรี เพื่อรวบรวมข้อมูลนำไปใช้  train model 
--รับข้อมูลมา โดยเราจะหาข้อมูล ที่เคยมีคนทำคล้ายกัน คัดข้อมูลของเขามาใช้ train model
+---
 
-2. จัดแบ่งข้อมูล
-     โดยเราจะนำข้อมูลที่หามาได้ นำมาจำแนก แบ่งออกเป็นแต่ละ
-     คลาสโดยจะจัดทำ Folder แยกออกจากกัน และทำการแบ่ง 
-     ชุดข้อมูลออกเป็น 3 ชุด train set , validation set , test set
+## 🗂️ ชุดข้อมูล (Dataset)
 
-3. ทำ data augment ที่ใช้ก็จะมี
-  rescale
-  rotation_range
-  width_shift_range
-  height_shift_range
-  shear_range
-  zoom_range
-  horizontal_flip
-  brightness_range
+### แหล่งที่มา
 
-4.  ทำการ Resize และ Normalize
-     โดยขนาด ที่ปรับ 224 * 224 * 3
+| แหล่งข้อมูล | รายละเอียด |
+|---|---|
+| จัดเก็บเอง | ลงพื้นที่เก็บข้อมูล ณ มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ วิทยาเขตปราจีนบุรี |
+| แหล่งอ้างอิงเพิ่มเติม | [Kaggle: Helmet Dataset (Classification)](https://www.kaggle.com/datasets/abuzarkhaaan/helmet-dataset-cls/data) |
 
-5.  แบ่งข้อมูลเป็น Train / Validation / Test set
-Train 80 %
-Validation 10 %
-Test 10 %
+### จำนวนภาพแยกตามคลาส
 
-6. เก็บ Label Map ไว้ใช้ตอนทำนายTrain 80 %
-class 0  All wearing helmet
-class 1    No helmet
-class 2   Patial use
+| Class | คำอธิบาย | จัดเก็บเอง | จาก Kaggle | รวม |
+|---|---|---|---|---|
+| 0 | สวมหมวกกันน็อคครบทุกคน (All wearing helmet) | 300 | 155 | 455 |
+| 1 | ไม่สวมหมวกกันน็อคเลยสักคน (No helmet) | 300 | 155 | 455 |
+| 2 | สวมหมวกกันน็อคบางคน (Partial use) | 455 | – | 455 |
 
-#เปรียบเทียบข้อมูล
-Model	Test Acc	 F1 (Weight)	recall(Weight)	Precision(Weight)	Size (MB)
-Base CNN	92.59%	0.9250	0.9259	0.9260	76.3
-GAP+KR	86.67%	0.8591	08667	0.8984	6.08
-VGG+GAP	85.19%	08514	0.8519	0.8560	74.1
+### การแบ่งชุดข้อมูล
 
-*Best Model test set*
-accuracy   92.59%
-loss       0.2133
+| ชุดข้อมูล | สัดส่วน |
+|---|---|
+| Train set | 80% |
+| Validation set | 10% |
+| Test set | 10% |
 
-#สรุปผลการทดลอง
-ผลการทดลองแสดงให้เห็นว่าโมเดลสามารถจำแนกภาพได้แม่นยำสูง โดย Test Accuracy อยู่ที่ประมาณ 92–93% และ Weighted F1-score ประมาณ 0.92–0.93 
-ซึ่ง Recall ของคลาสสำคัญ “No_helmet” อยู่ที่ 0.84 แสดงให้เห็นว่าโมเดลสามารถจับผู้ไม่ใส่หมวกได้ดี แม้ dataset จะมีขนาดเล็ก การใช้ Dropout ช่วยลด overfitting 
-และทำให้โมเดล generalize กับภาพ unseen ได้ดี สรุปได้ว่าโมเดลมีความพร้อมสำหรับการนำไปใช้ตรวจสอบความปลอดภัยผู้ขับขี่บนถนนจริง และสามารถปรับปรุงเพิ่มเติมโดยเพิ่ม dataset
+---
 
-#รายละเอียดเพิ่มเติม https://canva.link/so44dtbrik7t5h5
+## ⚙️ ขั้นตอนการเตรียมข้อมูล (Data Preparation Pipeline)
+
+1. **จัดหาข้อมูล**
+   - ถ่ายภาพเอง: นัดกลุ่มตัวอย่างถ่ายภาพที่ มจพ. วิทยาเขตปราจีนบุรี
+   - รวบรวมข้อมูลเพิ่มเติมจากชุดข้อมูลสาธารณะที่มีลักษณะใกล้เคียงกัน
+
+2. **จัดแบ่งข้อมูล**
+   - จำแนกภาพออกเป็น 3 คลาส และจัดเก็บใน Folder แยกตามคลาส
+   - แบ่งข้อมูลเป็น Train / Validation / Test set
+
+3. **Data Augmentation**
+   - Rescale
+   - Rotation range
+   - Width shift range
+   - Height shift range
+   - Shear range
+   - Zoom range
+   - Horizontal flip
+   - Brightness range
+
+4. **Resize & Normalize**
+   - ปรับขนาดภาพเป็น **224 × 224 × 3**
+
+5. **แบ่งชุดข้อมูลสำหรับ Train / Validation / Test**
+   - Train: 80% | Validation: 10% | Test: 10%
+
+6. **จัดเก็บ Label Map**
+
+   | Class | Label |
+   |---|---|
+   | 0 | All wearing helmet |
+   | 1 | No helmet |
+   | 2 | Partial use |
+
+---
+
+## 📊 ผลการทดลองและเปรียบเทียบโมเดล
+
+| Model | Test Accuracy | F1 (Weighted) | Recall (Weighted) | Precision (Weighted) | Size (MB) |
+|---|---|---|---|---|---|
+| **Base CNN** | **92.59%** | **0.9250** | **0.9259** | **0.9260** | 76.3 |
+| GAP + KR | 86.67% | 0.8591 | 0.8667 | 0.8984 | 6.08 |
+| VGG + GAP | 85.19% | 0.8514 | 0.8519 | 0.8560 | 74.1 |
+
+### 🏆 โมเดลที่ดีที่สุด (Base CNN)
+
+- **Test Accuracy:** 92.59%
+- **Loss:** 0.2133
+
+---
+
+## 🔍 สรุปผลการทดลอง
+
+ผลการทดลองแสดงให้เห็นว่าโมเดล **Base CNN** สามารถจำแนกภาพได้อย่างแม่นยำสูง โดยมี **Test Accuracy ประมาณ 92–93%** และ **Weighted F1-score ประมาณ 0.92–0.93**
+
+- Recall ของคลาสสำคัญ **"No Helmet"** อยู่ที่ **0.84** สะท้อนให้เห็นว่าโมเดลสามารถตรวจจับผู้ไม่สวมหมวกกันน็อคได้ดี แม้ในสภาวะที่ dataset มีขนาดค่อนข้างเล็ก
+- การใช้ **Dropout** ช่วยลดปัญหา Overfitting และทำให้โมเดล generalize กับภาพที่ไม่เคยเห็นมาก่อน (unseen data) ได้ดีขึ้น
+- โมเดลมีความพร้อมสำหรับการนำไปต่อยอดใช้งานจริงในระบบตรวจสอบความปลอดภัยของผู้ขับขี่บนท้องถนน
+- แนวทางการพัฒนาต่อ: เพิ่มปริมาณ dataset เพื่อเสริมความแม่นยำและความหลากหลายของโมเดลในสถานการณ์จริง
+
+---
+
+## 🔗 ข้อมูลเพิ่มเติม
+
+- Presentation / Slide: [ดูรายละเอียดเพิ่มเติม](https://canva.link/so44dtbrik7t5h5)
+- Dataset อ้างอิง: [Kaggle Helmet Dataset](https://www.kaggle.com/datasets/abuzarkhaaan/helmet-dataset-cls/data)
+
+---
+
+## 🧰 Skills ที่แสดงในโปรเจกต์นี้
+
+`Data Collection` · `Data Cleaning & Labeling` · `Data Augmentation` · `Image Preprocessing (Resize/Normalize)` · `Model Evaluation & Comparison (Accuracy, F1, Recall, Precision)` · `Deep Learning (CNN)` · `Model Optimization (Dropout, Overfitting Reduction)`
